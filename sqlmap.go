@@ -1,15 +1,21 @@
 package xorm
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"text/template"
 
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/Unknwon/goconfig"
+)
+
+const (
+	defaultNamespace = "default"
 )
 
 type SqlMap struct {
@@ -292,7 +298,7 @@ func (sqlMap *SqlMap) paresSql(filepath string) error {
 		}
 
 		if mapper.Namespace == "" {
-			mapper.Namespace = "default"
+			mapper.Namespace = defaultNamespace
 		}
 
 		if _, ok := sqlMap.Mappers[mapper.Namespace]; ok {
@@ -300,23 +306,7 @@ func (sqlMap *SqlMap) paresSql(filepath string) error {
 			// sqlMap.Mappers[mapper.Namespace] = mapper
 		} else {
 			sqlMap.Mappers[mapper.Namespace] = mapper
-			fmt.Println("---->", mapper.Namespace)
-			for idx, v := range mapper.Sqls {
-				fmt.Println(idx, "---->", *v)
-			}
 		}
-
-		/*
-			var result Result
-			err = xml.Unmarshal(content, &result)
-			if err != nil {
-				return err
-			}
-
-			for _, sql := range result.Sql {
-				sqlMap.Sql[sql.Id] = sql.Value
-			}
-		*/
 
 		return nil
 	}
@@ -443,4 +433,62 @@ func (sqlMap *SqlMap) getSqlMap(keys ...interface{}) map[string]string {
 	}
 
 	return resultSqlMap
+}
+
+func parseTagName(sqlTagName string) (string, string) {
+	idx := strings.Index(sqlTagName, ".")
+	if idx == -1 {
+		return defaultNamespace, sqlTagName
+	}
+
+	buf := []byte(sqlTagName)
+	namespace := string(buf[:idx])
+	id := string(buf[idx+1:])
+	if namespace == "" {
+		return defaultNamespace, id
+	}
+
+	return namespace, id
+}
+
+func (sqlMap *SqlMap) getMapperSql(sqlTagName string) *Sql {
+	namespace, id := parseTagName(sqlTagName)
+	mapper, ok := sqlMap.Mappers[namespace]
+	if !ok {
+		return &Sql{Value: fmt.Sprintf("namespace[%s] not found", namespace)}
+	}
+
+	sql, ok := mapper.Sqls[id]
+	if !ok {
+		return &Sql{Value: fmt.Sprintf("[%s.%s] not found", namespace, id)}
+	}
+
+	return sql
+}
+
+var (
+	defaultTpl = template.New("mapper")
+)
+
+func formatTemplate(pattern string, args ...interface{}) string {
+	if len(args) == 0 {
+		return ""
+	}
+
+	var buf bytes.Buffer
+	tpl := template.Must(defaultTpl.Parse(pattern))
+	err := tpl.Execute(&buf, args[0])
+	if err != nil {
+		return ""
+	}
+
+	return buf.String()
+}
+
+func (this *Sql) Format(args ...interface{}) string {
+	if this._isAnalysis {
+		return formatTemplate(this.Value, args...)
+	}
+
+	return this.Value
 }

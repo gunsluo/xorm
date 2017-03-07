@@ -1,8 +1,6 @@
 package xorm
 
-import (
-	"encoding/json"
-)
+import "encoding/json"
 
 func (engine *Engine) SetSqlMapRootDir(sqlMapRootDir string) *Engine {
 	engine.sqlMap.SqlMapRootDir = sqlMapRootDir
@@ -18,7 +16,8 @@ func (engine *Engine) SqlMapClient(sqlTagName string, args ...interface{}) *Sess
 	session := engine.NewSession()
 	session.IsAutoClose = true
 	session.IsSqlFunc = true
-	return session.Sql(engine.sqlMap.Sql[sqlTagName], args...)
+	sql := engine.sqlMap.getMapperSql(sqlTagName)
+	return session.Sql(sql.Format(args...))
 }
 
 func (engine *Engine) SqlTemplateClient(sqlTagName string, args ...interface{}) *Session {
