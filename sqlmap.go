@@ -2,7 +2,7 @@ package xorm
 
 import (
 	"encoding/json"
-	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 
 	"os"
@@ -15,6 +15,7 @@ import (
 type SqlMap struct {
 	SqlMapRootDir string
 	Sql           map[string]string
+	Mappers       map[string]*Mapper
 	Extension     map[string]string
 	Capacity      uint
 	Cipher        Cipher
@@ -26,13 +27,30 @@ type SqlMapOptions struct {
 	Cipher    Cipher
 }
 
-type Result struct {
-	Sql []Sql `xml:"sql"`
+var SqlType = struct {
+	Define int
+	Insert int
+	Delete int
+	Update int
+	Select int
+}{
+	0,
+	1,
+	2,
+	3,
+	4,
 }
 
 type Sql struct {
-	Value string `xml:",chardata"`
-	Id    string `xml:"id,attr"`
+	Id          string
+	Value       string
+	_type       int
+	_isAnalysis bool
+}
+
+type Mapper struct {
+	Namespace string
+	Sqls      map[string]*Sql
 }
 
 func (engine *Engine) SetSqlMapCipher(cipher Cipher) {
@@ -47,8 +65,10 @@ func (sqlMap *SqlMap) checkNilAndInit() {
 	if sqlMap.Sql == nil {
 		if sqlMap.Capacity == 0 {
 			sqlMap.Sql = make(map[string]string, 100)
+			sqlMap.Mappers = make(map[string]*Mapper, 100)
 		} else {
 			sqlMap.Sql = make(map[string]string, sqlMap.Capacity)
+			sqlMap.Mappers = make(map[string]*Mapper, sqlMap.Capacity)
 		}
 
 	}
@@ -265,15 +285,38 @@ func (sqlMap *SqlMap) paresSql(filepath string) error {
 	sqlMap.checkNilAndInit()
 
 	if strings.HasSuffix(filepath, sqlMap.Extension["xml"]) {
-		var result Result
-		err = xml.Unmarshal(content, &result)
+
+		mapper, err := UnmarshalMapper(content)
 		if err != nil {
 			return err
 		}
 
-		for _, sql := range result.Sql {
-			sqlMap.Sql[sql.Id] = sql.Value
+		if mapper.Namespace == "" {
+			mapper.Namespace = "default"
 		}
+
+		if _, ok := sqlMap.Mappers[mapper.Namespace]; ok {
+			// warning: same namespace name
+			// sqlMap.Mappers[mapper.Namespace] = mapper
+		} else {
+			sqlMap.Mappers[mapper.Namespace] = mapper
+			fmt.Println("---->", mapper.Namespace)
+			for idx, v := range mapper.Sqls {
+				fmt.Println(idx, "---->", *v)
+			}
+		}
+
+		/*
+			var result Result
+			err = xml.Unmarshal(content, &result)
+			if err != nil {
+				return err
+			}
+
+			for _, sql := range result.Sql {
+				sqlMap.Sql[sql.Id] = sql.Value
+			}
+		*/
 
 		return nil
 	}
