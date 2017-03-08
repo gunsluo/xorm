@@ -12,14 +12,15 @@ type XmlIf struct {
 }
 
 type XmlSet struct {
-	Ifs string `xml:",innerxml"`
+	XMLName xml.Name `xml:""`
+	Ifs     string   `xml:",innerxml"`
 	//Ifs []XmlIf `xml:"if"`
 }
 
 type XmlSql struct {
 	Id    string `xml:"id,attr"`
 	Value string `xml:",cdata"`
-	Set   XmlSet `xml:"set"`
+	Set   XmlSet `xml:",any"`
 }
 
 type XmlInclude struct {
@@ -67,6 +68,10 @@ func (this *XmlSet) Parse() (res string, flag bool) {
 	vs, err := parseValue(this.Ifs)
 	if err != nil {
 		return
+	}
+
+	if this.XMLName.Local == "where" && len(vs) > 0 {
+		res = stringJoin(res, "where 1=1 ")
 	}
 
 	for _, v := range vs {

@@ -77,7 +77,10 @@ func example() {
 		panic(err)
 	}
 
-	fmt.Println("--->", len(fds), fds)
+	fmt.Println("test.selectEntryList search result:", len(fds))
+	for idx, val := range fds {
+		fmt.Println("\t", idx, ": ", val)
+	}
 }
 
 func example2() {
@@ -100,7 +103,10 @@ func example2() {
 		panic(err)
 	}
 
-	fmt.Println("--->", len(fds), fds)
+	fmt.Println("test.selectentryAll search result:", len(fds))
+	for idx, val := range fds {
+		fmt.Println("\t", idx, ": ", val)
+	}
 }
 
 func main() {
