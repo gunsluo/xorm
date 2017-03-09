@@ -12,8 +12,8 @@
     <!-- 全部条件(更多功能可以通过queryData扩展实现)  -->
     <sql id='QUERY_WHERE_CLAUSE'>
         <where>
-            <if test='{{if ne .UserId 0}}'><![CDATA[AND user_id={{.UserId}}]]></if>
-            <if test='{{if ne .ApplyStatus ""}}'><![CDATA[AND apply_status='{{.ApplyStatus}}']]></if>
+            <if test='{%if UserId != 0 %}'><![CDATA[and user_id=?UserId]]></if>
+            <if test='{%if ApplyStatus != nil and ApplyStatus != "" %}'><![CDATA[and apply_status=?ApplyStatus]]></if>
         </where>
     </sql>
 
@@ -26,7 +26,7 @@
     </select>
 
     <select id='selectEntryAll'>
-        <![CDATA[select * from t_apply_detail tad LEFT JOIN t_apply_object tao on tad.apply_object_id = tao.apply_object_id where user_id={{.UserId}}]]>
+        <![CDATA[select * from t_apply_detail tad LEFT JOIN t_apply_object tao on tad.apply_object_id = tao.apply_object_id where user_id=?UserId]]>
     </select>
 
     <!-- 其它SQL语句 -->

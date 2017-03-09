@@ -17,7 +17,7 @@ func (engine *Engine) SqlMapClient(sqlTagName string, args ...interface{}) *Sess
 	session.IsAutoClose = true
 	session.IsSqlFunc = true
 	sql := engine.sqlMap.getMapperSql(sqlTagName)
-	return session.Sql(sql.Format(args...))
+	return session.Sql(sql.Format(args...), args...)
 }
 
 func (engine *Engine) SqlTemplateClient(sqlTagName string, args ...interface{}) *Session {

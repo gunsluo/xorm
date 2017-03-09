@@ -1,11 +1,11 @@
 package xorm
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"text/template"
+
+	pongo2 "gopkg.in/flosch/pongo2.v3"
 
 	"os"
 	"path/filepath"
@@ -466,23 +466,31 @@ func (sqlMap *SqlMap) getMapperSql(sqlTagName string) *Sql {
 	return sql
 }
 
-var (
-	defaultTpl = template.New("mapper")
-)
-
 func formatTemplate(pattern string, args ...interface{}) string {
-	if len(args) == 0 {
-		return ""
-	}
 
-	var buf bytes.Buffer
-	tpl := template.Must(defaultTpl.Parse(pattern))
-	err := tpl.Execute(&buf, args[0])
+	tpl, err := pongo2.FromString(pattern)
 	if err != nil {
-		return ""
+		return err.Error()
 	}
 
-	return buf.String()
+	if len(args) == 0 {
+		parmap := &pongo2.Context{}
+
+		out, err := tpl.Execute(*parmap)
+		if err != nil {
+			return err.Error()
+		}
+
+		return out
+	} else {
+		parmap := args[0].(*map[string]interface{})
+		out, err := tpl.Execute(*parmap)
+		if err != nil {
+			return err.Error()
+		}
+
+		return out
+	}
 }
 
 func (this *Sql) Format(args ...interface{}) string {

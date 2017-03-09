@@ -59,7 +59,7 @@ type XmlMapper struct {
 }
 
 func (this *XmlIf) Parse() string {
-	return fmt.Sprintf("%s%s{{- end}} ", this.Test, this.Value)
+	return fmt.Sprintf("%s%s{%% endif %%} ", this.Test, this.Value)
 }
 
 func (this *XmlSet) Parse() (res string, flag bool) {
