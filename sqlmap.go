@@ -490,5 +490,9 @@ func (this *Sql) Format(args ...interface{}) string {
 		return formatTemplate(this.Value, args...)
 	}
 
+	if len(args) > 0 {
+		return formatTemplate(this.Value, args...)
+	}
+
 	return this.Value
 }

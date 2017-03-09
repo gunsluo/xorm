@@ -26,7 +26,7 @@
     </select>
 
     <select id='selectEntryAll'>
-        <![CDATA[select * from t_apply_detail tad LEFT JOIN t_apply_object tao on tad.apply_object_id = tao.apply_object_id]]>
+        <![CDATA[select * from t_apply_detail tad LEFT JOIN t_apply_object tao on tad.apply_object_id = tao.apply_object_id where user_id={{.UserId}}]]>
     </select>
 
     <!-- 其它SQL语句 -->

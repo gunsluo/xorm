@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/xormplus/xorm"
+	"github.com/gunsluo/xorm"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -98,7 +98,8 @@ func example2() {
 	}
 
 	var fds []FlowDetail
-	err = engine.SqlMapClient("test.selectEntryAll").Find(&fds)
+	paramMap := map[string]interface{}{"UserId": 23}
+	err = engine.SqlMapClient("test.selectEntryAll", &paramMap).Find(&fds)
 	if err != nil {
 		panic(err)
 	}
