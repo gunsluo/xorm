@@ -381,7 +381,8 @@ func (resultStructs *ResultStructs) XmlIndent(prefix string, indent string, reco
 }
 
 func (session *Session) SqlMapClient(sqlTagName string, args ...interface{}) *Session {
-	return session.Sql(session.Engine.sqlMap.Sql[sqlTagName], args...)
+	sql := session.Engine.sqlMap.getMapperSql(sqlTagName)
+	return session.Sql(sql.Format(args...), args...)
 }
 
 func (session *Session) SqlTemplateClient(sqlTagName string, args ...interface{}) *Session {

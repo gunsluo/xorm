@@ -71,7 +71,11 @@ func (this *XmlSet) Parse() (res string, flag bool) {
 	}
 
 	if this.XMLName.Local == "where" && len(vs) > 0 {
-		res = stringJoin(res, "where 1=1 ")
+		if vs[0]._type == ValueType.Char || vs[0]._type == ValueType.Cdata {
+			res = stringJoin(res, "where ")
+		} else {
+			res = stringJoin(res, "where 1=1 ")
+		}
 	}
 
 	for _, v := range vs {
