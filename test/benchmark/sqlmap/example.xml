@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<mapper namespace='test'>
+
+    <!-- user_demo 所有查询列 -->
+    <sql id='QUERY_COLUMN_LIST'>
+        <![CDATA[*]]>
+    </sql>
+
+    <!-- user_demo 查询列来源表-->
+    <sql id='QUERY_FROM_TABLE'><![CDATA[FROM t_apply_detail tad LEFT JOIN t_apply_object tao on tad.apply_object_id = tao.apply_object_id]]></sql>
+    
+    <!-- 全部条件(更多功能可以通过queryData扩展实现)  -->
+    <sql id='QUERY_WHERE_CLAUSE'>
+        <where>
+            <if test='{%if UserId != 0 %}'><![CDATA[and user_id=?UserId]]></if>
+            <if test='{%if ApplyStatus != nil and ApplyStatus != "" %}'><![CDATA[and apply_status=?ApplyStatus]]></if>
+        </where>
+    </sql>
+
+    <!-- 查询,通过条件 -->
+    <select id='selectEntryList'>
+        <![CDATA[SELECT]]>
+        <include refid='QUERY_COLUMN_LIST'/>
+        <include refid='QUERY_FROM_TABLE'/>
+        <include refid='QUERY_WHERE_CLAUSE'/>
+    </select>
+
+    <select id='selectEntryAll'>
+        <![CDATA[select * from t_apply_detail tad LEFT JOIN t_apply_object tao on tad.apply_object_id = tao.apply_object_id where user_id=?UserId]]>
+    </select>
+
+    <!-- 其它SQL语句 -->
+</mapper>
