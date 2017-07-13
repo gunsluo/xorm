@@ -483,7 +483,17 @@ func formatTemplate(pattern string, args ...interface{}) string {
 
 		return out
 	} else {
-		parmap := args[0].(*map[string]interface{})
+		if parmap, ok := args[0].(*map[string]interface{}); ok {
+			out, err := tpl.Execute(*parmap)
+			if err != nil {
+				return err.Error()
+			}
+
+			return out
+		}
+
+		parmap := &pongo2.Context{}
+
 		out, err := tpl.Execute(*parmap)
 		if err != nil {
 			return err.Error()
